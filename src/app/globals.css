@@ -1,0 +1,305 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* ── Theme background tokens — set via data-theme on <html> ─────────────── */
+  :root,
+  [data-theme="deep"] {
+    --bg:         #07080F;
+    --sidebar-bg: rgba(7,   8,  15, 0.94);
+    --header-bg:  rgba(7,   8,  15, 0.85);
+    --glow-1:     rgba(99, 102, 241, 0.20);
+    --glow-2:     rgba(139,  92, 246, 0.13);
+    --glow-3:     rgba(99, 102, 241, 0.04);
+    /* Card surface tokens */
+    --card-bg:           linear-gradient(to bottom, rgba(255,255,255,0.04), rgba(255,255,255,0.015));
+    --card-border:       rgba(255,255,255,0.08);
+    --card-shadow:       inset 0 1px 0 0 rgba(255,255,255,0.06), 0 1px 3px rgba(0,0,0,0.4);
+    --card-hover-border: rgba(255,255,255,0.14);
+    --card-hover-shadow: inset 0 1px 0 0 rgba(255,255,255,0.09), 0 4px 12px rgba(0,0,0,0.5);
+  }
+
+  [data-theme="normal"] {
+    --bg:         #0E1629;
+    --sidebar-bg: rgba(14,  22,  41, 0.95);
+    --header-bg:  rgba(14,  22,  41, 0.88);
+    --glow-1:     rgba(59, 130, 246, 0.18);
+    --glow-2:     rgba(99, 102, 241, 0.12);
+    --glow-3:     rgba(59, 130, 246, 0.04);
+    --card-bg:           linear-gradient(to bottom, rgba(255,255,255,0.065), rgba(255,255,255,0.025));
+    --card-border:       rgba(255,255,255,0.10);
+    --card-shadow:       inset 0 1px 0 0 rgba(255,255,255,0.08), 0 1px 4px rgba(0,0,0,0.35);
+    --card-hover-border: rgba(255,255,255,0.17);
+    --card-hover-shadow: inset 0 1px 0 0 rgba(255,255,255,0.10), 0 4px 14px rgba(0,0,0,0.4);
+  }
+
+  [data-theme="light"] {
+    --bg:         #F0F4F8;
+    --sidebar-bg: rgba(240, 244, 248, 0.97);
+    --header-bg:  rgba(240, 244, 248, 0.92);
+    --glow-1:     rgba(99, 102, 241, 0.10);
+    --glow-2:     rgba(59, 130, 246, 0.07);
+    --glow-3:     rgba(99, 102, 241, 0.04);
+    --card-bg:           linear-gradient(to bottom, rgba(255,255,255,1.0), rgba(255,255,255,0.88));
+    --card-border:       rgba(0,0,0,0.07);
+    --card-shadow:       0 1px 4px rgba(0,0,0,0.06), inset 0 1px 0 0 rgba(255,255,255,1.0);
+    --card-hover-border: rgba(99,102,241,0.35);
+    --card-hover-shadow: 0 4px 16px rgba(0,0,0,0.09), inset 0 1px 0 0 rgba(255,255,255,1.0);
+  }
+
+  :root {
+    color-scheme: dark;
+    --background: 228 30% 4%;
+    --foreground: 210 40% 98%;
+    --card: 228 30% 5%;
+    --card-foreground: 210 40% 98%;
+    --popover: 228 30% 5%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 228 30% 10%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 228 30% 10%;
+    --muted-foreground: 215 20.2% 55%;
+    --accent: 228 30% 10%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 228 30% 9%;
+    --input: 228 30% 9%;
+    --ring: 212.7 26.8% 83.9%;
+    --radius: 0.65rem;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Ultra-subtle default borders — the Linear/Vercel baseline */
+  * {
+    border-color: rgba(255, 255, 255, 0.06);
+  }
+
+  body {
+    background-color: var(--bg);
+    @apply text-slate-100 antialiased;
+    font-family: var(--font-inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+      'Helvetica Neue', sans-serif);
+    /* Ligatures + contextual alternates for Inter */
+    font-feature-settings: 'rlig' 1, 'calt' 1;
+    /* Layered depth: glow orbs (theme-controlled) + dot grid */
+    background-image:
+      radial-gradient(ellipse 75% 50% at 15% -8%,  var(--glow-1) 0%, transparent 60%),
+      radial-gradient(ellipse 55% 40% at 88% 110%, var(--glow-2) 0%, transparent 55%),
+      radial-gradient(ellipse 40% 30% at 50%  50%, var(--glow-3) 0%, transparent 70%),
+      url("data:image/svg+xml,%3Csvg width='28' height='28' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='1' cy='1' r='0.8' fill='rgba(255,255,255,0.055)'/%3E%3C/svg%3E");
+    background-attachment: fixed;
+  }
+
+  h1, h2, h3, h4 {
+    @apply tracking-tight;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
+  }
+
+  /* Consistent indigo focus ring across every input / select */
+  input:not([type='checkbox']):not([type='radio']):not([type='range']),
+  textarea,
+  select {
+    @apply transition-all duration-150;
+  }
+  input:not([type='checkbox']):not([type='radio']):not([type='range']):focus,
+  textarea:focus,
+  select:focus {
+    @apply outline-none ring-2 ring-indigo-500/40 border-indigo-500/50;
+  }
+
+  /* Thin, ghost scrollbar — almost invisible */
+  ::-webkit-scrollbar       { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 4px;
+    transition: background 0.2s;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.16); }
+
+  ::selection { @apply bg-indigo-600/30 text-indigo-100; }
+}
+
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+
+  /* Gradient text — portfolio value headline (brighter/more white) */
+  .text-gradient {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 45%, #a5b4fc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Positive P&L gradient */
+  .text-gradient-positive {
+    background: linear-gradient(135deg, #6ee7b7 0%, #34d399 60%, #a7f3d0 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Negative P&L gradient */
+  .text-gradient-negative {
+    background: linear-gradient(135deg, #fca5a5 0%, #f87171 60%, #fecaca 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Financial figures — tabular numerals */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1, 'lnum' 1;
+  }
+
+  /* Card surface — near-transparent, ring instead of solid border */
+  .surface {
+    background-color: rgba(255, 255, 255, 0.025);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.07);
+  }
+  .surface:hover {
+    background-color: rgba(255, 255, 255, 0.04);
+  }
+
+  /* Heavy glassmorphism — sidebars, modals, floating panels */
+  .glass {
+    @apply backdrop-blur-2xl;
+    background-color: var(--sidebar-bg);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06);
+  }
+
+  /* Stripe-style indigo inner highlight */
+  .glow-indigo {
+    box-shadow:
+      inset 0 1px 0 0 rgba(99, 102, 241, 0.14),
+      0 0 0 1px rgba(99, 102, 241, 0.16);
+  }
+
+  /* Stripe-style diffused glow blob — used as absolute child */
+  .glow-blob {
+    pointer-events: none;
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(48px);
+    opacity: 0.6;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   OUTSIDE @layer — these rules win over Tailwind utilities by source order
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Themed card surface — reads CSS vars set by data-theme ─────────────── */
+.themed-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  box-shadow: var(--card-shadow);
+}
+.themed-card:hover {
+  border-color: var(--card-hover-border);
+  box-shadow: var(--card-hover-shadow);
+}
+
+/* ── Light mode: swap dot grid for a dark one ───────────────────────────── */
+[data-theme="light"] body {
+  background-image:
+    radial-gradient(ellipse 75% 50% at 15% -8%,  var(--glow-1) 0%, transparent 60%),
+    radial-gradient(ellipse 55% 40% at 88% 110%, var(--glow-2) 0%, transparent 55%),
+    radial-gradient(ellipse 40% 30% at 50%  50%, var(--glow-3) 0%, transparent 70%),
+    url("data:image/svg+xml,%3Csvg width='28' height='28' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='1' cy='1' r='0.8' fill='rgba(0,0,0,0.045)'/%3E%3C/svg%3E");
+}
+
+/* ── Light mode: flip white/dark text classes to readable dark values ────── */
+[data-theme="light"] .text-white      { color: #0F172A; }
+[data-theme="light"] .text-slate-100  { color: #0F172A; }
+[data-theme="light"] .text-slate-200  { color: #1E293B; }
+[data-theme="light"] .text-slate-300  { color: #334155; }
+[data-theme="light"] .text-slate-400  { color: #475569; }
+[data-theme="light"] .text-slate-500  { color: #64748B; }
+[data-theme="light"] .text-slate-600  { color: #94A3B8; }
+[data-theme="light"] .text-slate-700  { color: #CBD5E1; }
+
+/* ── Light mode: text-gradient → dark-to-indigo ─────────────────────────── */
+[data-theme="light"] .text-gradient {
+  background: linear-gradient(135deg, #0F172A 0%, #1E293B 40%, #4F46E5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Light mode: white borders → subtle dark borders ────────────────────── */
+[data-theme="light"] [class*="border-white"] {
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+/* ── Light mode: color-scheme → light for native form elements ──────────── */
+[data-theme="light"] {
+  color-scheme: light;
+}
+
+/* ── Light mode: scrollbar thumb in dark gray ───────────────────────────── */
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.12);
+}
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.22);
+}
+
+/* ── Light mode: vibrant gradient for headline numbers ─────────────────── */
+[data-theme="light"] .text-gradient {
+  background: linear-gradient(135deg, #3730A3 0%, #7C3AED 50%, #1D4ED8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Light mode: saturated accent text colors (dark-on-light versions) ─── */
+[data-theme="light"] .text-emerald-400  { color: #059669; }
+[data-theme="light"] .text-emerald-500  { color: #047857; }
+[data-theme="light"] .text-indigo-400   { color: #4338CA; }
+[data-theme="light"] .text-indigo-500   { color: #3730A3; }
+[data-theme="light"] .text-amber-400    { color: #B45309; }
+[data-theme="light"] .text-amber-500    { color: #92400E; }
+[data-theme="light"] .text-rose-400     { color: #BE123C; }
+[data-theme="light"] .text-rose-500     { color: #9F1239; }
+[data-theme="light"] .text-blue-400     { color: #1D4ED8; }
+[data-theme="light"] .text-orange-400   { color: #C2410C; }
+[data-theme="light"] .text-purple-400   { color: #7C3AED; }
+
+/* ── Light mode: stronger, bolder headline numbers ──────────────────────── */
+[data-theme="light"] .text-5xl { font-size: 3.25rem; font-weight: 800; }
+[data-theme="light"] .text-6xl { font-size: 4rem;    font-weight: 800; }
+[data-theme="light"] .text-2xl { font-weight: 700; }
+[data-theme="light"] .text-xl  { font-weight: 600; }
+
+/* ── Light mode: card accent stripe stays vivid ──────────────────────────── */
+[data-theme="light"] .bg-indigo-500\/\[0\.14\] { background-color: rgba(99,102,241,0.12); }
+[data-theme="light"] .bg-emerald-500\/\[0\.07\] { background-color: rgba(5,150,105,0.10); }
+[data-theme="light"] .bg-rose-500\/\[0\.07\]    { background-color: rgba(190,18,60,0.08); }
+
+/* ── Light mode: modals, form inputs, inline panels ─────────────────────── */
+[data-theme="light"] .bg-slate-900  { background-color: #FFFFFF; }
+[data-theme="light"] .bg-slate-800  { background-color: #F1F5F9; }
+[data-theme="light"] .bg-slate-800\/20 { background-color: rgba(241,245,249,0.8); }
+[data-theme="light"] .bg-slate-800\/40 { background-color: rgba(241,245,249,0.9); }
+[data-theme="light"] .bg-slate-800\/60 { background-color: rgba(226,232,240,0.9); }
+[data-theme="light"] .bg-slate-800\/\[0\.6\] { background-color: rgba(226,232,240,0.8); }
+[data-theme="light"] .bg-slate-700  { background-color: #E2E8F0; }
+[data-theme="light"] .bg-slate-700\/60 { background-color: rgba(226,232,240,0.6); }
+
+[data-theme="light"] .border-slate-700 { border-color: #CBD5E1; }
+[data-theme="light"] .border-slate-700\/60 { border-color: rgba(148,163,184,0.6); }
+[data-theme="light"] .border-slate-800 { border-color: #E2E8F0; }
+
+/* ── Light mode: table & row hover ──────────────────────────────────────── */
+[data-theme="light"] .bg-slate-800\/\[0\.08\] { background-color: rgba(0,0,0,0.04); }
+[data-theme="light"] .bg-emerald-500\/\[0\.08\] { background-color: rgba(5,150,105,0.08); }
+[data-theme="light"] .bg-rose-500\/\[0\.08\]    { background-color: rgba(190,18,60,0.07); }

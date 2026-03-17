@@ -1,0 +1,148 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id           String        @id @default(cuid())
+  name         String
+  type         AccountType
+  currency     String        @default("USD")
+  balance      Float         @default(0)
+  lastSyncedAt DateTime?
+  isActive     Boolean       @default(true)
+  metadata     Json          @default("{}")
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  holdings     Holding[]
+  transactions Transaction[]
+}
+
+model Holding {
+  id                 String        @id @default(cuid())
+  accountId          String
+  symbol             String
+  name               String
+  assetClass         AssetClass
+  quantity           Float
+  avgCostBasis       Float?
+  currentPrice       Float
+  currentValue       Float
+  dailyChangePercent Float         @default(0)
+  currency           String        @default("USD")
+  metadata           Json          @default("{}")
+  updatedAt          DateTime      @updatedAt
+  account            Account       @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  transactions       Transaction[]
+  purchaseLots       PurchaseLot[]
+
+  @@index([accountId])
+  @@index([symbol])
+}
+
+// PurchaseLot — Crypto cost-basis micro-ledger.
+// Tracks individual buy orders for a crypto holding so we can compute
+// the true all-time ROI without a full transaction ledger.
+// avgCostBasis on the parent Holding is recomputed (weighted average)
+// every time a lot is added or deleted.
+model PurchaseLot {
+  id          String   @id @default(cuid())
+  holdingId   String
+  date        DateTime
+  quantity    Float
+  fiatCostUsd Float
+  createdAt   DateTime @default(now())
+  holding     Holding  @relation(fields: [holdingId], references: [id], onDelete: Cascade)
+
+  @@index([holdingId])
+}
+
+model Transaction {
+  id          String            @id @default(cuid())
+  accountId   String
+  holdingId   String?
+  type        TransactionType
+  symbol      String?
+  quantity    Float?
+  price       Float?
+  amount      Float
+  currency    String            @default("USD")
+  description String?
+  date        DateTime
+  importedAt  DateTime?
+  source      TransactionSource @default(MANUAL)
+  metadata    Json              @default("{}")
+  createdAt   DateTime          @default(now())
+  account     Account           @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  holding     Holding?          @relation(fields: [holdingId], references: [id])
+
+  @@index([accountId])
+  @@index([date])
+  @@index([symbol])
+}
+
+model NetWorthSnapshot {
+  id         String   @id @default(cuid())
+  totalValue Float
+  breakdown  Json
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+// Single-row settings table (single-user MVP).
+// Uses a fixed id = "singleton" so upsert never creates duplicate rows.
+model UserSettings {
+  id               String    @id @default("singleton")
+  investmentThesis String?
+  lastSyncAt       DateTime?
+  lastAiInsightAt  DateTime?
+  updatedAt        DateTime  @updatedAt
+}
+
+model PriceCache {
+  id               String   @id @default(cuid())
+  symbol           String   @unique
+  price            Float
+  currency         String   @default("USD")
+  changePercent24h Float    @default(0)
+  source           String
+  fetchedAt        DateTime @default(now())
+}
+
+enum AccountType {
+  BANK
+  CRYPTO
+  BROKERAGE
+  PENSION
+}
+
+enum AssetClass {
+  STOCK
+  ETF
+  CRYPTO
+  CASH
+  BOND
+  OTHER
+}
+
+enum TransactionType {
+  BUY
+  SELL
+  DEPOSIT
+  WITHDRAWAL
+  DIVIDEND
+  FEE
+  TRANSFER
+}
+
+enum TransactionSource {
+  MANUAL
+  CSV_IMPORT
+  API
+}

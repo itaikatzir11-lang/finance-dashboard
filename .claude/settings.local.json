@@ -1,0 +1,49 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -la /Users/itaykatzir/finance-dashboard/src/app/api/accounts/[id]/)",
+      "Bash(mkdir -p /Users/itaykatzir/finance-dashboard/src/app/api/accounts/[id]/eth-holding)",
+      "Bash(mkdir -p /Users/itaykatzir/finance-dashboard/src/app/api/holdings/[id])",
+      "Bash(xargs ls -lt)",
+      "Bash(npx prisma db pull)",
+      "Bash(node -e \":*)",
+      "Bash(npx tsc --noEmit)",
+      "Bash(ls /Users/itaykatzir/finance-dashboard/src/app/api/accounts/[id]/)",
+      "Bash(npm install @anthropic-ai/sdk)",
+      "Bash(ls /Users/itaykatzir/finance-dashboard/src/app/api/accounts/[id]/balance-history/)",
+      "Bash(ls /Users/itaykatzir/finance-dashboard/.env*)",
+      "Bash(ls -la /Users/itaykatzir/finance-dashboard/*.pdf /Users/itaykatzir/finance-dashboard/*.xlsx /Users/itaykatzir/finance-dashboard/*.csv)",
+      "Read(//Users/itaykatzir/**)",
+      "Bash(npm run build)",
+      "WebFetch(domain:developer.discountbank.co.il)",
+      "Bash(openssl req -x509 -newkey rsa:2048 -keyout /Users/itaykatzir/finance-dashboard/certs/sandbox-tpp.key -out /Users/itaykatzir/finance-dashboard/certs/sandbox-tpp.crt -days 365 -nodes -subj \"/CN=sandbox-tpp/O=TestTPP/C=IL\")",
+      "Bash(sed -i '' 's/For BANK accounts: extracts breakdown.bank from NetWorthSnapshot./For BANK accounts: extracts breakdown.cash from NetWorthSnapshot./' /Users/itaykatzir/finance-dashboard/src/app/api/accounts/[id]/balance-history/route.ts)",
+      "Bash(sed -i '' 's/For BROKERAGE accounts: extracts breakdown.brokerage./For BROKERAGE accounts: extracts breakdown.capitalMarket./' /Users/itaykatzir/finance-dashboard/src/app/api/accounts/[id]/balance-history/route.ts)",
+      "Bash(npm run db:push)",
+      "Bash(npm install twilio resend)",
+      "Bash(npm install twilio resend --save)",
+      "Bash(npm install twilio resend --legacy-peer-deps)",
+      "Bash(grep -E \"^\\(twilio|resend\\)$\")",
+      "Bash(grep -n \"currency\\\\|currentValue\\\\|ILS\\\\|USD\" /Users/itaykatzir/finance-dashboard/src/app/api/accounts/[id]/btc-holding/route.ts)",
+      "Bash(grep -n \"BTCHoldingData\\\\|holdingId\\\\|holding\\\\.id\\\\|id:\" /Users/itaykatzir/finance-dashboard/src/app/api/accounts/[id]/btc-holding/route.ts)",
+      "Bash(grep -n \"holdingId\\\\|ETHHoldingData\" /Users/itaykatzir/finance-dashboard/src/app/api/accounts/[id]/eth-holding/route.ts)",
+      "Bash(grep -v \"Type ''\\\\{\")",
+      "Skill(claude-api)",
+      "Skill(claude-api:*)",
+      "Bash(npm install pdf-parse @types/pdf-parse --save)",
+      "Bash(npx prisma db push)",
+      "Bash(psql finance_dashboard -c \"\\\\d \"\"UserSettings\"\"\")",
+      "Bash(wait)",
+      "Bash(grep -r \"concat\\\\|interpolate\\\\|template.*string\\\\|\\\\`.*$\\\\{\" /Users/itaykatzir/finance-dashboard/src/app/api --include=\"*.ts\")",
+      "Bash(/Users/itaykatzir/finance-dashboard/next.config.mjs:*)",
+      "Bash(npm install @neondatabase/serverless @prisma/adapter-neon)",
+      "Bash(npx prisma generate)",
+      "Bash(git init)",
+      "Bash(git add .)",
+      "Bash(git commit -m \"Initial commit — FinDash personal finance dashboard\")"
+    ],
+    "additionalDirectories": [
+      "/Users/itaykatzir/finance-dashboard/src/app/api/holdings/[id]"
+    ]
+  }
+}
