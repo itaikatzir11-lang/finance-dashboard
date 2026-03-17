@@ -11,7 +11,7 @@ import { PrismaClient } from '@prisma/client'
 // ─────────────────────────────────────────────────────────────────────────────
 
 function buildClient(): PrismaClient {
-  const url = process.env.DATABASE_URL ?? ''
+  const url = process.env.POSTGRES_PRISMA_URL ?? process.env.DATABASE_URL ?? ''
   const isNeon = url.includes('neon.tech')
 
   if (isNeon) {
