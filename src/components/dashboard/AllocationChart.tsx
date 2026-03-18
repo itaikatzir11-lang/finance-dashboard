@@ -10,43 +10,28 @@ import {
 } from 'recharts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertTriangle } from 'lucide-react'
-import { formatCurrency, getAssetClassColor } from '@/lib/utils'
+import { formatCurrency } from '@/lib/utils'
 import { useFxRate } from '@/hooks/useFxRate'
 import { useChartTheme } from '@/hooks/useChartTheme'
-import type { HoldingWithAccount, AllocationData, HoldingsResponse } from '@/types'
+import type { NetWorthSummary, AllocationData } from '@/types'
 
-const ASSET_CLASS_LABELS: Record<string, string> = {
-  STOCK_ETF: 'Stocks & ETF',
-  CRYPTO:    'Crypto',
-  CASH:      'Cash',
-  BOND:      'Bonds',
-  OTHER:     'Other',
-}
+const SLICE_DEFS: Array<{ key: keyof NetWorthSummary['breakdown']; label: string; color: string }> = [
+  { key: 'capitalMarket', label: 'Capital Market', color: '#6366f1' },
+  { key: 'cash',          label: 'Cash',           color: '#10b981' },
+  { key: 'crypto',        label: 'Crypto',         color: '#f59e0b' },
+  { key: 'pension',       label: 'Pension',        color: '#8b5cf6' },
+]
 
-/**
- * Convert each holding to ILS and group by asset class.
- * STOCK and ETF are merged into a single "Stocks & ETF" bucket.
- */
-function buildAllocation(holdings: HoldingWithAccount[], usdToIls: number): AllocationData[] {
-  const totals: Record<string, number> = {}
-  let grandTotal = 0
+function buildAllocation(breakdown: NetWorthSummary['breakdown'], usdToIls: number): AllocationData[] {
+  const entries = SLICE_DEFS.map(({ key, label, color }) => ({
+    name:    label,
+    value:   (breakdown[key] ?? 0) * usdToIls,
+    color,
+    percent: 0,
+  })).filter((e) => e.value > 0)
 
-  for (const h of holdings) {
-    const ilsValue = h.currency === 'ILS' ? h.currentValue : h.currentValue * usdToIls
-    // Merge STOCK and ETF into one bucket
-    const key = (h.assetClass === 'STOCK' || h.assetClass === 'ETF') ? 'STOCK_ETF' : h.assetClass
-    totals[key] = (totals[key] ?? 0) + ilsValue
-    grandTotal += ilsValue
-  }
-
-  return Object.entries(totals)
-    .sort(([, a], [, b]) => b - a)
-    .map(([assetClass, value]) => ({
-      name: ASSET_CLASS_LABELS[assetClass] ?? (assetClass.charAt(0) + assetClass.slice(1).toLowerCase()),
-      value,
-      color: getAssetClassColor(assetClass),
-      percent: grandTotal > 0 ? (value / grandTotal) * 100 : 0,
-    }))
+  const total = entries.reduce((s, e) => s + e.value, 0)
+  return entries.map((e) => ({ ...e, percent: total > 0 ? (e.value / total) * 100 : 0 }))
 }
 
 interface CustomTooltipProps {
@@ -95,24 +80,20 @@ function LegendItem({ name, value, color, percent }: LegendItemProps) {
 }
 
 export function AllocationChart() {
-  const [holdings, setHoldings] = useState<HoldingWithAccount[]>([])
-  const [dataSource, setDataSource] = useState<'db' | 'mock' | null>(null)
+  const [data, setData] = useState<NetWorthSummary | null>(null)
   const [loading, setLoading] = useState(true)
   const { usdToIls } = useFxRate()
 
   useEffect(() => {
-    fetch('/api/holdings')
+    fetch('/api/net-worth')
       .then((r) => r.json())
-      .then((res: HoldingsResponse) => {
-        setHoldings(Array.isArray(res.data) ? res.data : [])
-        setDataSource(res.dataSource ?? 'db')
-      })
+      .then((res: NetWorthSummary) => setData(res))
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [])
 
-  // Rebuild allocation whenever holdings or the FX rate changes.
-  const allocation = buildAllocation(holdings, usdToIls)
+  const allocation = data ? buildAllocation(data.breakdown, usdToIls) : []
+  const isMock = data?.dataSource === 'mock'
 
   return (
     <Card className="h-full">
@@ -121,7 +102,7 @@ export function AllocationChart() {
           <CardTitle className="text-sm font-semibold text-slate-300 uppercase tracking-wider">
             Asset Allocation
           </CardTitle>
-          {dataSource === 'mock' && !loading && (
+          {isMock && !loading && (
             <div className="flex items-center gap-1.5">
               <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
               <span className="text-xs text-amber-400">Sample</span>
@@ -134,32 +115,20 @@ export function AllocationChart() {
           <div className="animate-pulse">
             <div className="mx-auto mt-2 h-[180px] w-[180px] rounded-full bg-slate-800" />
             <div className="mt-5 space-y-3">
-              <div className="flex items-center justify-between py-1">
-                <div className="flex items-center gap-2">
-                  <div className="h-2.5 w-2.5 rounded-full bg-slate-700" />
-                  <div className="h-3 w-28 rounded bg-slate-700" />
-                </div>
-                <div className="h-3 w-20 rounded bg-slate-700" />
-              </div>
-              <div className="flex items-center justify-between py-1">
-                <div className="flex items-center gap-2">
-                  <div className="h-2.5 w-2.5 rounded-full bg-slate-700" />
+              {[28, 20, 14].map((w) => (
+                <div key={w} className="flex items-center justify-between py-1">
+                  <div className="flex items-center gap-2">
+                    <div className="h-2.5 w-2.5 rounded-full bg-slate-700" />
+                    <div className={`h-3 w-${w} rounded bg-slate-700`} />
+                  </div>
                   <div className="h-3 w-20 rounded bg-slate-700" />
                 </div>
-                <div className="h-3 w-20 rounded bg-slate-700" />
-              </div>
-              <div className="flex items-center justify-between py-1">
-                <div className="flex items-center gap-2">
-                  <div className="h-2.5 w-2.5 rounded-full bg-slate-700" />
-                  <div className="h-3 w-14 rounded bg-slate-700" />
-                </div>
-                <div className="h-3 w-20 rounded bg-slate-700" />
-              </div>
+              ))}
             </div>
           </div>
         ) : allocation.length === 0 ? (
           <div className="flex items-center justify-center h-[280px]">
-            <p className="text-sm text-slate-500 text-center">No holdings yet. Add positions to see allocation.</p>
+            <p className="text-sm text-slate-500 text-center">No data yet. Sync accounts to see allocation.</p>
           </div>
         ) : (
           <>
