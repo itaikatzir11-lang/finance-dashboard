@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { RefreshCw, Clock } from 'lucide-react'
 import { formatCurrency, getChangeColor, formatPercent } from '@/lib/utils'
+import { useFxRate } from '@/hooks/useFxRate'
 import type { NetWorthSummary } from '@/types'
 import { format } from 'date-fns'
 
@@ -15,6 +16,7 @@ export function Header({ title }: HeaderProps) {
   const [syncing, setSyncing] = useState(false)
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
   const [now, setNow] = useState<Date>(new Date())
+  const { usdToIls } = useFxRate()
 
   useEffect(() => {
     setLastUpdated(new Date())
@@ -58,6 +60,8 @@ export function Header({ title }: HeaderProps) {
   }
 
   const changeColor = netWorth ? getChangeColor(netWorth.dailyChange) : 'text-slate-500'
+  // Suppress daily change if the percentage looks stale/corrupted (e.g. old ILS-scale snapshot)
+  const dailyChangeValid = netWorth ? Math.abs(netWorth.dailyChangePercent) <= 30 : false
 
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-white/[0.05] backdrop-blur-2xl px-6 lg:px-8" style={{ backgroundColor: 'var(--header-bg)' }}>
@@ -86,14 +90,16 @@ export function Header({ title }: HeaderProps) {
         {netWorth && (
           <div className="text-right hidden sm:block">
             <div className="text-xl font-semibold text-white tabular-nums tracking-tighter">
-              {formatCurrency(netWorth.total)}
+              {formatCurrency(netWorth.total * usdToIls, 'ILS')}
             </div>
-            <div className={`text-[11px] font-medium ${changeColor} flex items-center justify-end gap-1`}>
-              <span className="text-[9px]">{netWorth.dailyChange >= 0 ? '▲' : '▼'}</span>
-              <span>{formatCurrency(Math.abs(netWorth.dailyChange))}</span>
-              <span>({formatPercent(netWorth.dailyChangePercent)})</span>
-              <span className="text-slate-600 font-normal">today</span>
-            </div>
+            {dailyChangeValid && (
+              <div className={`text-[11px] font-medium ${changeColor} flex items-center justify-end gap-1`}>
+                <span className="text-[9px]">{netWorth.dailyChange >= 0 ? '▲' : '▼'}</span>
+                <span>{formatCurrency(Math.abs(netWorth.dailyChange * usdToIls), 'ILS')}</span>
+                <span>({formatPercent(netWorth.dailyChangePercent)})</span>
+                <span className="text-slate-600 font-normal">today</span>
+              </div>
+            )}
           </div>
         )}
 

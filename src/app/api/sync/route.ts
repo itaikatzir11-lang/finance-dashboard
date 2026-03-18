@@ -62,8 +62,10 @@ async function snapshotNetWorth() {
           ? holdingsValue
           : toUsd(acc.balance, acc.currency)
       } else if (acc.type === 'BROKERAGE') {
+        let hasOpen = false
         for (const h of acc.holdings) {
           if (h.quantity <= 0) continue
+          hasOpen = true
           const usdVal = toUsd(h.currentValue, h.currency)
           if (h.assetClass === 'CASH') {
             cash += usdVal
@@ -71,7 +73,7 @@ async function snapshotNetWorth() {
             capitalMarket += usdVal
           }
         }
-        if (acc.holdings.length === 0) {
+        if (!hasOpen) {
           cash += toUsd(acc.balance, acc.currency)
         }
       } else if (acc.type === 'PENSION') {

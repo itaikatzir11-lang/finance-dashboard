@@ -41,8 +41,10 @@ export async function GET() {
         )
         cryptoTotal += accountValue
       } else if (account.type === 'BROKERAGE') {
+        let hasOpenHoldings = false
         for (const h of account.holdings) {
           if (h.quantity <= 0) continue
+          hasOpenHoldings = true
           const usdValue = h.currency === 'ILS' ? h.currentValue * ILS_USD : h.currentValue
           if (h.assetClass === 'CASH') {
             cashTotal += usdValue
@@ -51,8 +53,8 @@ export async function GET() {
             capitalMarketTotal += usdValue
           }
         }
-        // If no holdings, count account balance as cash
-        if (account.holdings.length === 0) {
+        // If no open holdings (empty account or all positions closed), count balance as cash
+        if (!hasOpenHoldings) {
           const usdBalance = account.currency === 'ILS'
             ? account.balance * ILS_USD
             : account.balance

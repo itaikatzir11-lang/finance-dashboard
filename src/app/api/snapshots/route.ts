@@ -23,7 +23,7 @@ export async function POST(_request: NextRequest) {
 
     const accounts = await prisma.account.findMany({
       where: { isActive: true },
-      include: { holdings: { select: { currentValue: true, currency: true, assetClass: true } } },
+      include: { holdings: { select: { quantity: true, currentValue: true, currency: true, assetClass: true } } },
     })
 
     // cash = bank balance + brokerage CASH holdings
@@ -36,14 +36,19 @@ export async function POST(_request: NextRequest) {
           ? account.balance * ILS_USD
           : account.balance
       } else if (account.type === 'CRYPTO') {
+        // Only count open positions (quantity > 0) — matches /api/net-worth behaviour
         const holdingsValue = account.holdings.reduce((sum, h) => {
+          if (h.quantity <= 0) return sum
           return sum + (h.currency === 'ILS' ? h.currentValue * ILS_USD : h.currentValue)
         }, 0)
         breakdown.crypto += holdingsValue > 0
           ? holdingsValue
           : (account.currency === 'ILS' ? account.balance * ILS_USD : account.balance)
       } else if (account.type === 'BROKERAGE') {
+        let hasOpenHoldings = false
         for (const h of account.holdings) {
+          if (h.quantity <= 0) continue  // skip closed positions — matches /api/net-worth
+          hasOpenHoldings = true
           const usdValue = h.currency === 'ILS' ? h.currentValue * ILS_USD : h.currentValue
           if (h.assetClass === 'CASH') {
             breakdown.cash += usdValue
@@ -51,13 +56,16 @@ export async function POST(_request: NextRequest) {
             breakdown.capitalMarket += usdValue
           }
         }
-        if (account.holdings.length === 0) {
+        // If no open holdings (empty or all positions closed), count balance as cash
+        if (!hasOpenHoldings) {
           breakdown.cash += account.currency === 'ILS'
             ? account.balance * ILS_USD
             : account.balance
         }
       } else if (account.type === 'PENSION') {
+        // Only count open positions — matches /api/net-worth behaviour
         const holdingsValue = account.holdings.reduce((sum, h) => {
+          if (h.quantity <= 0) return sum
           return sum + (h.currency === 'ILS' ? h.currentValue * ILS_USD : h.currentValue)
         }, 0)
         breakdown.pension += holdingsValue > 0
